@@ -25,7 +25,8 @@ import {
   Check,
   X,
   ArrowLeft,
-  BarChart 
+  BarChart,
+  UserPlus 
 } from "lucide-react";
 
 // Map sport names to icons
@@ -66,3 +67,5 @@ export const CheckIcon = (props: any) => <Check {...props} />;
 export const CloseIcon = (props: any) => <X {...props} />;
 export const BackIcon = (props: any) => <ArrowLeft {...props} />;
 export const ChartIcon = (props: any) => <BarChart {...props} />;
+export const LogOutIcon = (props: any) => <LogOut {...props} />;
+export const UserPlusIcon = (props: any) => <UserPlus {...props} />;

@@ -22,8 +22,8 @@ import {
   LoginIcon, 
   SettingsIcon,
   UserIcon,
-  LogOut,
-  UserPlus
+  LogOutIcon,
+  UserPlusIcon
 } from "@/utils/iconMapping";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -93,7 +93,7 @@ export function Navbar() {
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={logout}>
-                    <LogOut className="mr-2 h-4 w-4" />
+                    <LogOutIcon className="mr-2 h-4 w-4" />
                     <span>Log out</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -108,7 +108,7 @@ export function Navbar() {
                 </Link>
                 <Link to="/signup">
                   <Button className="bg-sports-blue hover:bg-sports-blue/90">
-                    <UserPlus className="mr-2 h-4 w-4" />
+                    <UserPlusIcon className="mr-2 h-4 w-4" />
                     Sign Up
                   </Button>
                 </Link>
@@ -149,7 +149,7 @@ export function Navbar() {
                           onClick={logout}
                           className="flex items-center justify-start gap-2 px-4 py-2 h-auto font-normal"
                         >
-                          <LogOut className="h-5 w-5" />
+                          <LogOutIcon className="h-5 w-5" />
                           <span>Logout</span>
                         </Button>
                       </>
@@ -160,7 +160,7 @@ export function Navbar() {
                           <span>Login</span>
                         </Link>
                         <Link to="/signup" className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-gray-100">
-                          <UserPlus className="h-5 w-5" />
+                          <UserPlusIcon className="h-5 w-5" />
                           <span>Sign Up</span>
                         </Link>
                       </>
