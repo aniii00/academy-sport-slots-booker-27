@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -32,12 +33,12 @@ export default {
 					DEFAULT: 'hsl(var(--secondary))',
 					foreground: 'hsl(var(--secondary-foreground))'
 				},
-        sports: {
-          blue: '#0070DC',
-          orange: '#FF7A00',
-          lightBlue: '#E6F3FF',
-          lightOrange: '#FFF0E6',
-        },
+                sports: {
+                  blue: '#0070DC',
+                  orange: '#FF7A00',
+                  lightBlue: '#E6F3FF',
+                  lightOrange: '#FFF0E6',
+                },
 				destructive: {
 					DEFAULT: 'hsl(var(--destructive))',
 					foreground: 'hsl(var(--destructive-foreground))'
