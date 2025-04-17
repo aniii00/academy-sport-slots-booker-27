@@ -13,6 +13,7 @@ import Slots from "./pages/Slots";
 import Booking from "./pages/Booking";
 import BookingSuccess from "./pages/BookingSuccess";
 import Admin from "./pages/Admin";
+import Profile from "./pages/Profile";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -47,6 +48,11 @@ const App = () => (
               <Route path="/" element={<Home />} />
               <Route path="/centers" element={<Centers />} />
               <Route path="/slots" element={<Slots />} />
+              <Route path="/profile" element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              } />
               <Route path="/booking" element={
                 <ProtectedRoute>
                   <Booking />

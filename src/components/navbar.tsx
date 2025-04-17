@@ -28,12 +28,12 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 
 export function Navbar() {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, profile, isAuthenticated, logout } = useAuth();
   
   // Function to get user initials for avatar
   const getUserInitials = () => {
-    if (!user?.name) return "U";
-    return user.name
+    if (!profile?.name) return "U";
+    return profile.name
       .split(" ")
       .map(part => part[0])
       .join("")
@@ -71,16 +71,16 @@ export function Navbar() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuLabel>{profile?.name || "User Account"}</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem>
                     <Link to="/profile" className="flex w-full items-center">
                       <UserIcon className="mr-2 h-4 w-4" />
-                      <span>Profile</span>
+                      <span>My Profile</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem>
-                    <Link to="/bookings" className="flex w-full items-center">
+                    <Link to="/profile?tab=bookings" className="flex w-full items-center">
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       <span>My Bookings</span>
                     </Link>
@@ -140,6 +140,10 @@ export function Navbar() {
                     
                     {isAuthenticated ? (
                       <>
+                        <Link to="/profile" className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-gray-100">
+                          <UserIcon className="h-5 w-5" />
+                          <span>My Profile</span>
+                        </Link>
                         <Link to="/admin" className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-gray-100">
                           <SettingsIcon className="h-5 w-5" />
                           <span>Admin Panel</span>

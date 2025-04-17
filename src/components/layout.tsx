@@ -4,10 +4,12 @@ import { Navbar } from "./navbar";
 import { Footer } from "./footer";
 import { HomeIcon, GridIcon, CalendarIcon, UserIcon } from "@/utils/iconMapping";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function Layout() {
   const isMobile = useIsMobile();
   const location = useLocation();
+  const { isAuthenticated } = useAuth();
   
   // Check which tab is active based on the current path
   const isActive = (path: string) => {
@@ -63,9 +65,9 @@ export function Layout() {
             </Link>
             
             <Link 
-              to="/admin" 
+              to={isAuthenticated ? "/profile" : "/login"} 
               className={`flex flex-col items-center justify-center flex-1 py-2 ${
-                isActive('/admin') ? 'text-sports-blue' : 'text-gray-500'
+                isActive('/profile') || isActive('/login') ? 'text-sports-blue' : 'text-gray-500'
               }`}
             >
               <UserIcon className="h-6 w-6" />

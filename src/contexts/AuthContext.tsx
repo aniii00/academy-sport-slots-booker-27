@@ -2,6 +2,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from '@/components/ui/sonner';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from "@/integrations/supabase/client";
+import { Session, User } from '@supabase/supabase-js';
 
 // Define the User interface
 export interface User {
@@ -11,67 +13,109 @@ export interface User {
   phone?: string;
 }
 
+// Define profile interface
+export interface Profile {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  created_at: string;
+}
+
 // Define the context type
 interface AuthContextType {
   user: User | null;
+  profile: Profile | null;
+  session: Session | null;
   isLoading: boolean;
   login: (email: string, password: string, remember: boolean) => Promise<boolean>;
   signup: (email: string, password: string, name: string, phone?: string) => Promise<boolean>;
   logout: () => void;
+  updateProfile: (profile: Partial<Profile>) => Promise<boolean>;
   isAuthenticated: boolean;
 }
 
 // Create the context with a default value
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Mock user database - in a real app, this would be a backend service
-const MOCK_USERS: User[] = [];
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // Check if user is logged in from localStorage
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (error) {
-        console.error('Failed to parse stored user:', error);
-        localStorage.removeItem('user');
+  // Fetch user profile from Supabase
+  const fetchProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+      
+      if (error) {
+        console.error('Error fetching profile:', error);
+        return;
       }
+      
+      if (data) {
+        setProfile(data);
+      }
+    } catch (error) {
+      console.error('Error fetching profile:', error);
     }
-    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        // Fetch profile if user is authenticated
+        if (session?.user) {
+          setTimeout(() => {
+            fetchProfile(session.user.id);
+          }, 0);
+        } else {
+          setProfile(null);
+        }
+      }
+    );
+
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        fetchProfile(session.user.id);
+      }
+    }).finally(() => {
+      setIsLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const login = async (email: string, password: string, remember: boolean): Promise<boolean> => {
     setIsLoading(true);
     
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
       
-      // Find user with matching email
-      const foundUser = MOCK_USERS.find(u => u.email.toLowerCase() === email.toLowerCase());
-      
-      // Check if user exists and password matches
-      // Note: In a real app, you would hash the password and compare the hashes
-      const mockPassword = btoa(password); // Base64 encoding as a simple "hash" simulation
-      const isValidUser = foundUser && btoa(password) === mockPassword;
-      
-      if (isValidUser && foundUser) {
-        setUser(foundUser);
-        if (remember) {
-          localStorage.setItem('user', JSON.stringify(foundUser));
-        }
-        toast.success('Login successful!');
-        return true;
-      } else {
-        toast.error('Invalid email or password');
+      if (error) {
+        toast.error(error.message);
         return false;
       }
+      
+      toast.success('Login successful!');
+      return true;
     } catch (error) {
       console.error('Login error:', error);
       toast.error('An error occurred during login');
@@ -85,31 +129,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name,
+            phone
+          }
+        }
+      });
       
-      // Check if email already exists
-      const existingUser = MOCK_USERS.find(u => u.email.toLowerCase() === email.toLowerCase());
-      
-      if (existingUser) {
-        toast.error('Email already registered');
+      if (error) {
+        toast.error(error.message);
         return false;
       }
-      
-      // Create new user
-      const newUser: User = {
-        id: `user-${Date.now()}`,
-        email,
-        name,
-        phone
-      };
-      
-      // Add user to mock database
-      MOCK_USERS.push(newUser);
-      
-      // Store password (in a real app, this would be hashed)
-      // Using base64 as a simple "hash" simulation
-      const mockPassword = btoa(password);
       
       toast.success('Account created successfully!');
       return true;
@@ -122,19 +156,49 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const logout = () => {
+  const updateProfile = async (profileData: Partial<Profile>): Promise<boolean> => {
+    if (!user) return false;
+    
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .update(profileData)
+        .eq('id', user.id);
+      
+      if (error) {
+        toast.error(error.message);
+        return false;
+      }
+      
+      // Refresh profile data
+      fetchProfile(user.id);
+      toast.success('Profile updated successfully!');
+      return true;
+    } catch (error) {
+      console.error('Update profile error:', error);
+      toast.error('An error occurred while updating your profile');
+      return false;
+    }
+  };
+
+  const logout = async () => {
+    await supabase.auth.signOut();
     setUser(null);
-    localStorage.removeItem('user');
+    setProfile(null);
+    setSession(null);
     toast.success('Logged out successfully');
     navigate('/');
   };
 
   const value = {
     user,
+    profile,
+    session,
     isLoading,
     login,
     signup,
     logout,
+    updateProfile,
     isAuthenticated: !!user
   };
 
