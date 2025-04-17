@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from '@/components/ui/sonner';
 import { useNavigate } from 'react-router-dom';
@@ -169,6 +170,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       toast.success('Account created successfully! Please check your email for verification.');
+      navigate('/email-verification', { state: { email } });
       return true;
     } catch (error) {
       console.error('Signup error:', error);
@@ -234,4 +236,3 @@ export const useAuth = (): AuthContextType => {
   }
   return context;
 };
-

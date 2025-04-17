@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
@@ -14,7 +13,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/contexts/AuthContext";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
-// Form schema with validation
 const signupSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email address"),
@@ -41,7 +39,6 @@ export default function Signup() {
   const { signup } = useAuth();
   const navigate = useNavigate();
 
-  // React Hook Form with Zod validation
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
@@ -53,7 +50,6 @@ export default function Signup() {
     },
   });
 
-  // Password strength indicators
   const password = form.watch("password");
   const hasMinLength = password.length >= 8;
   const hasUppercase = /[A-Z]/.test(password);
@@ -61,14 +57,12 @@ export default function Signup() {
   const hasNumber = /[0-9]/.test(password);
   const hasSpecialChar = /[^A-Za-z0-9]/.test(password);
 
-  // Handle form submission
   const onSubmit = async (values: SignupFormValues) => {
     setIsSubmitting(true);
     try {
       const success = await signup(values.email, values.password, values.name, values.phone);
       if (success) {
-        // Redirect to email verification page with email
-        navigate("/email-verification", { state: { email: values.email } });
+        // The redirect is now handled in the signup function in AuthContext
       }
     } finally {
       setIsSubmitting(false);
@@ -158,7 +152,6 @@ export default function Signup() {
                 )}
               />
 
-              {/* Password strength indicators */}
               {password && (
                 <div className="space-y-2 text-sm">
                   <p className="font-medium">Password must contain:</p>

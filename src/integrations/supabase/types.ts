@@ -11,39 +11,33 @@ export type Database = {
     Tables: {
       bookings: {
         Row: {
-          amount: number | null
-          booking_date: string
           center_name: string
           created_at: string
-          end_time: string
           id: string
+          slot_time: string
           sport_type: string
-          start_time: string
-          status: string | null
+          status: string
+          updated_at: string
           user_id: string
         }
         Insert: {
-          amount?: number | null
-          booking_date: string
           center_name: string
           created_at?: string
-          end_time: string
           id?: string
+          slot_time: string
           sport_type: string
-          start_time: string
-          status?: string | null
+          status?: string
+          updated_at?: string
           user_id: string
         }
         Update: {
-          amount?: number | null
-          booking_date?: string
           center_name?: string
           created_at?: string
-          end_time?: string
           id?: string
+          slot_time?: string
           sport_type?: string
-          start_time?: string
-          status?: string | null
+          status?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -51,27 +45,30 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string
-          email: string | null
+          email: string
+          first_name: string | null
           id: string
-          name: string | null
-          phone: string | null
-          role: string | null
+          last_name: string | null
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string
         }
         Insert: {
           created_at?: string
-          email?: string | null
+          email: string
+          first_name?: string | null
           id: string
-          name?: string | null
-          phone?: string | null
-          role?: string | null
+          last_name?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
         }
         Update: {
           created_at?: string
-          email?: string | null
+          email?: string
+          first_name?: string | null
           id?: string
-          name?: string | null
-          phone?: string | null
-          role?: string | null
+          last_name?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
         }
         Relationships: []
       }
@@ -83,7 +80,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      user_role: "user" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -198,6 +195,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      user_role: ["user", "admin"],
+    },
   },
 } as const
