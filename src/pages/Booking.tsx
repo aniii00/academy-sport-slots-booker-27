@@ -105,8 +105,8 @@ export default function Booking() {
         },
       });
       
-      if (!response.data.success) {
-        throw new Error(response.data.error || "Failed to create order");
+      if (!response.data?.success) {
+        throw new Error(response.data?.error || "Failed to create order");
       }
       
       const { order, key_id } = response.data;
@@ -143,6 +143,8 @@ export default function Booking() {
   
   const onPaymentSuccess = async (orderId: string, response: any) => {
     try {
+      console.log("Payment success response:", response);
+      
       // Verify payment with server
       const verifyResponse = await supabase.functions.invoke('razorpay', {
         body: {
@@ -153,24 +155,47 @@ export default function Booking() {
         },
       });
       
-      if (!verifyResponse.data.success || !verifyResponse.data.valid) {
-        throw new Error("Payment verification failed");
+      console.log("Verify payment response:", verifyResponse);
+      
+      if (!verifyResponse.data?.success) {
+        throw new Error("Payment verification request failed");
+      }
+      
+      if (!verifyResponse.data?.valid) {
+        throw new Error("Payment signature validation failed");
       }
       
       // Save booking to database
       if (slot && center && sport && user) {
-        const { error } = await supabase.from('bookings').insert({
+        const bookingDate = new Date(slot.date);
+        const formattedDate = format(bookingDate, 'yyyy-MM-dd');
+        
+        console.log("Saving booking to database with:", {
           user_id: user.id,
           center_name: center.name,
           sport_type: sport.name,
+          booking_date: formattedDate,
           start_time: slot.startTime,
           end_time: slot.endTime,
-          booking_date: slot.date,
           amount: slot.price,
           status: 'confirmed'
         });
         
-        if (error) throw error;
+        const { error } = await supabase.from('bookings').insert({
+          user_id: user.id,
+          center_name: center.name,
+          sport_type: sport.name,
+          booking_date: formattedDate,
+          start_time: slot.startTime,
+          end_time: slot.endTime,
+          amount: slot.price,
+          status: 'confirmed'
+        });
+        
+        if (error) {
+          console.error("Database error:", error);
+          throw error;
+        }
       }
       
       toast.success("Booking confirmed! You'll receive details on your phone.");

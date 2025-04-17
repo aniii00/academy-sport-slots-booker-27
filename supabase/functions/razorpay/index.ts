@@ -1,5 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createHmac } from "https://deno.land/std@0.168.0/node/crypto.ts";
 
 const RAZORPAY_KEY_ID = Deno.env.get('RAZORPAY_KEY_ID');
 const RAZORPAY_KEY_SECRET = Deno.env.get('RAZORPAY_KEY_SECRET');
@@ -54,10 +55,10 @@ serve(async (req) => {
     else if (action === 'verify_payment') {
       const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = data;
       
-      // Verify the payment signature
-      const generated_signature = crypto
-        .createHmac('sha256', RAZORPAY_KEY_SECRET)
-        .update(razorpay_order_id + "|" + razorpay_payment_id)
+      // Generate the expected signature for verification
+      const message = razorpay_order_id + "|" + razorpay_payment_id;
+      const generated_signature = createHmac('sha256', RAZORPAY_KEY_SECRET)
+        .update(message)
         .digest('hex');
       
       const isSignatureValid = generated_signature === razorpay_signature;
