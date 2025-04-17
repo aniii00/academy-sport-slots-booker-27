@@ -30,6 +30,9 @@ import { useAuth } from "@/contexts/AuthContext";
 export function Navbar() {
   const { user, profile, isAuthenticated, logout } = useAuth();
   
+  // Check if the user is an admin
+  const isAdmin = profile?.role === 'admin';
+  
   // Function to get user initials for avatar
   const getUserInitials = () => {
     if (!profile?.name) return "U";
@@ -55,7 +58,7 @@ export function Navbar() {
             <Link to="/" className="text-gray-600 hover:text-sports-blue">Home</Link>
             <Link to="/centers" className="text-gray-600 hover:text-sports-blue">Centers</Link>
             <Link to="/slots" className="text-gray-600 hover:text-sports-blue">Slots</Link>
-            {isAuthenticated && (
+            {isAuthenticated && isAdmin && (
               <Link to="/admin" className="text-gray-600 hover:text-sports-blue">Admin</Link>
             )}
           </nav>
@@ -85,12 +88,14 @@ export function Navbar() {
                       <span>My Bookings</span>
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Link to="/admin" className="flex w-full items-center">
-                      <SettingsIcon className="mr-2 h-4 w-4" />
-                      <span>Admin Panel</span>
-                    </Link>
-                  </DropdownMenuItem>
+                  {isAdmin && (
+                    <DropdownMenuItem>
+                      <Link to="/admin" className="flex w-full items-center">
+                        <SettingsIcon className="mr-2 h-4 w-4" />
+                        <span>Admin Panel</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={logout}>
                     <LogOutIcon className="mr-2 h-4 w-4" />
@@ -144,10 +149,12 @@ export function Navbar() {
                           <UserIcon className="h-5 w-5" />
                           <span>My Profile</span>
                         </Link>
-                        <Link to="/admin" className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-gray-100">
-                          <SettingsIcon className="h-5 w-5" />
-                          <span>Admin Panel</span>
-                        </Link>
+                        {isAdmin && (
+                          <Link to="/admin" className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-gray-100">
+                            <SettingsIcon className="h-5 w-5" />
+                            <span>Admin Panel</span>
+                          </Link>
+                        )}
                         <Button
                           variant="ghost"
                           onClick={logout}

@@ -13,12 +13,13 @@ export interface User {
   phone?: string;
 }
 
-// Define profile interface
+// Define profile interface with role
 export interface Profile {
   id: string;
   name: string;
   email: string;
   phone?: string;
+  role?: string;
   created_at: string;
 }
 

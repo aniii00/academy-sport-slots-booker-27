@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout } from "./components/layout";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/protected-route";
+import { AdminRoute } from "./components/admin-route";
 import Home from "./pages/Home";
 import Centers from "./pages/Centers";
 import Slots from "./pages/Slots";
@@ -66,9 +67,9 @@ const App = () => (
                 </ProtectedRoute>
               } />
               <Route path="/admin" element={
-                <ProtectedRoute>
+                <AdminRoute>
                   <Admin />
-                </ProtectedRoute>
+                </AdminRoute>
               } />
             </Route>
             <Route path="*" element={<NotFound />} />
