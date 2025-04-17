@@ -16,6 +16,7 @@ import Admin from "./pages/Admin";
 import Profile from "./pages/Profile";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import EmailVerification from "./pages/EmailVerification";
 import ForgotPassword from "./pages/ForgotPassword";
 import NotFound from "./pages/NotFound";
 
@@ -41,6 +42,7 @@ const App = () => (
             {/* Authentication routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/email-verification" element={<EmailVerification />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             
             {/* Main app routes */}

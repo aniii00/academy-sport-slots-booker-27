@@ -67,8 +67,8 @@ export default function Signup() {
     try {
       const success = await signup(values.email, values.password, values.name, values.phone);
       if (success) {
-        // Redirect to login after successful signup
-        navigate("/login");
+        // Redirect to email verification page with email
+        navigate("/email-verification", { state: { email: values.email } });
       }
     } finally {
       setIsSubmitting(false);
