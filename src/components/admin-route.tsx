@@ -1,6 +1,7 @@
 
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "@/components/ui/sonner";
 
 interface AdminRouteProps {
   children: React.ReactNode;
@@ -23,6 +24,8 @@ export function AdminRoute({ children }: AdminRouteProps) {
   }
 
   if (!isAdmin) {
+    // Show a toast message when access is denied
+    toast.error("You don't have admin access");
     // Redirect to home if not an admin
     return <Navigate to="/" replace />;
   }
