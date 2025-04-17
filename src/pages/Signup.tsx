@@ -1,5 +1,6 @@
+
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -7,10 +8,9 @@ import { Eye, EyeOff, ArrowRight, UserPlus, CheckCircle, XCircle } from "lucide-
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAuth } from "@/contexts/AuthContext";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useAuth } from "@/contexts/AuthContext";
 
 const signupSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -58,11 +58,7 @@ export default function Signup() {
   const onSubmit = async (values: SignupFormValues) => {
     setIsSubmitting(true);
     try {
-      console.log("Submitting signup form with values:", { ...values, password: "[REDACTED]" });
       await signup(values.email, values.password, values.name, values.phone);
-      // Note: Navigation to verification page is now handled in the signup function in AuthContext
-    } catch (error) {
-      console.error("Signup submission error:", error);
     } finally {
       setIsSubmitting(false);
     }

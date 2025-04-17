@@ -18,7 +18,6 @@ export default function EmailVerification() {
     console.log("Current session:", session);
     console.log("Email from location state:", email);
     
-    // If user is already authenticated (email verified), redirect to home
     if (session?.user?.email_confirmed_at) {
       console.log("Email already confirmed, redirecting to home");
       navigate("/");
@@ -26,7 +25,9 @@ export default function EmailVerification() {
   }, [session, navigate, email]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sports-lightBlue to-white p-4">
+    <div className="min-h-screen flex items
+
+-center justify-center bg-gradient-to-br from-sports-lightBlue to-white p-4">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="space-y-1">
           <div className="flex justify-center mb-4">

@@ -12,8 +12,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { toast } from "@/components/ui/sonner";
+import { supabase } from "@/integrations/supabase/client";
 
-// Form schema with validation
 const forgotPasswordSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
 });
@@ -24,7 +24,6 @@ export default function ForgotPassword() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
 
-  // React Hook Form with Zod validation
   const form = useForm<ForgotPasswordFormValues>({
     resolver: zodResolver(forgotPasswordSchema),
     defaultValues: {
@@ -32,16 +31,22 @@ export default function ForgotPassword() {
     },
   });
 
-  // Handle form submission
   const onSubmit = async (values: ForgotPasswordFormValues) => {
     setIsSubmitting(true);
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // In a real app, this would call an API endpoint
+      const { error } = await supabase.auth.resetPasswordForEmail(values.email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (error) {
+        throw error;
+      }
+
       setEmailSent(true);
       toast.success(`Password reset instructions sent to ${values.email}`);
+    } catch (error) {
+      console.error("Reset password error:", error);
+      toast.error("Failed to send reset instructions. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
