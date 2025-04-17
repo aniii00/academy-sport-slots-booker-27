@@ -11,6 +11,10 @@ export function AdminRoute({ children }: AdminRouteProps) {
   const { profile, isLoading } = useAuth();
   const location = useLocation();
   
+  // Debug the profile data to see what's happening
+  console.log("AdminRoute - profile:", profile);
+  console.log("AdminRoute - role:", profile?.role);
+  
   // Check if the user's role is admin
   const isAdmin = profile?.role === 'admin';
 

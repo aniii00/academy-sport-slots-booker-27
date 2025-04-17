@@ -30,7 +30,11 @@ import { useAuth } from "@/contexts/AuthContext";
 export function Navbar() {
   const { user, profile, isAuthenticated, logout } = useAuth();
   
-  // Check if the user is an admin
+  // Debug the user role
+  console.log("Navbar - profile:", profile);
+  console.log("Navbar - user role:", profile?.role);
+  
+  // Check if the user is an admin - must be exactly 'admin' string
   const isAdmin = profile?.role === 'admin';
   
   // Function to get user initials for avatar

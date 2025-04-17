@@ -49,6 +49,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Fetch user profile from Supabase
   const fetchProfile = async (userId: string) => {
     try {
+      console.log("Fetching profile for user ID:", userId);
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -61,7 +62,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       
       if (data) {
+        console.log("Profile data fetched:", data);
         setProfile(data);
+      } else {
+        console.log("No profile data found for user");
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -72,6 +76,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        console.log("Auth state changed, event:", event);
         setSession(session);
         
         if (session?.user) {
