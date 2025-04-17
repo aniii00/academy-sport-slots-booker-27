@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -13,6 +14,14 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { UserIcon, LogOutIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 interface Booking {
   id: string;
@@ -22,7 +31,6 @@ interface Booking {
   sport_type: string;
   slot_time: string;
   status: string;
-  updated_at: string;
 }
 
 export default function Profile() {
@@ -48,9 +56,9 @@ export default function Profile() {
       
       const { data, error } = await supabase
         .from("bookings")
-        .select()
+        .select("*")
         .eq("user_id", user?.id)
-        .order("created_at", { ascending: false });
+        .order("slot_time", { ascending: false });
 
       if (error) {
         console.error("Error fetching bookings:", error);
@@ -88,6 +96,14 @@ export default function Profile() {
         variant: "destructive",
       });
     }
+  };
+
+  const formatDateTime = (dateTimeString: string) => {
+    const date = new Date(dateTimeString);
+    return date.toLocaleString('en-IN', {
+      dateStyle: 'medium',
+      timeStyle: 'short'
+    });
   };
 
   return (
@@ -129,24 +145,34 @@ export default function Profile() {
             ) : bookings.length === 0 ? (
               <p className="text-muted-foreground">No bookings found.</p>
             ) : (
-              <div className="space-y-4">
-                {bookings.map((booking) => (
-                  <div
-                    key={booking.id}
-                    className="flex items-center justify-between p-4 border rounded-lg"
-                  >
-                    <div>
-                      <p className="font-medium">{booking.center_name} - {booking.sport_type}</p>
-                      <p className="text-sm text-muted-foreground">
-                        Slot: {new Date(booking.slot_time).toLocaleString()}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Status: {booking.status}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Center</TableHead>
+                    <TableHead>Sport</TableHead>
+                    <TableHead>Date & Time</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {bookings.map((booking) => (
+                    <TableRow key={booking.id}>
+                      <TableCell>{booking.center_name}</TableCell>
+                      <TableCell>{booking.sport_type}</TableCell>
+                      <TableCell>{formatDateTime(booking.slot_time)}</TableCell>
+                      <TableCell>
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          booking.status === 'confirmed' 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {booking.status}
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             )}
             <div className="mt-4 text-center">
               <Button 

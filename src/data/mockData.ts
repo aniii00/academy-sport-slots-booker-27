@@ -1,4 +1,3 @@
-
 // Mock data for Prashant Academy sports booking app
 
 export interface Sport {
@@ -139,7 +138,6 @@ export const centers: Center[] = [
   }
 ];
 
-// Generate time slots for the current and next 7 days
 export const generateTimeSlots = (): TimeSlot[] => {
   const slots: TimeSlot[] = [];
   const startTimes = ['06:00', '08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00'];
@@ -181,16 +179,40 @@ export const generateTimeSlots = (): TimeSlot[] => {
   // Add our special 1 rupee test slot - always available
   const today = new Date();
   const todayStr = today.toISOString().split('T')[0];
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowStr = tomorrow.toISOString().split('T')[0];
   
-  slots.push({
-    id: `slot-test-payment-${todayStr}`,
-    centerId: "center-1", // Bandra center
-    sportId: "sport-1", // Swimming
-    startTime: "15:00",
-    endTime: "16:00",
-    date: todayStr,
-    price: 1, // 1 rupee for testing
-    available: true
+  // Add multiple test slots at different times for easier testing
+  const testSlotTimes = [
+    { start: '10:00', end: '11:00' },
+    { start: '14:00', end: '15:00' },
+    { start: '16:00', end: '17:00' }
+  ];
+  
+  testSlotTimes.forEach(({ start, end }, index) => {
+    slots.push({
+      id: `slot-test-payment-${todayStr}-${index}`,
+      centerId: "center-1", // Bandra center
+      sportId: "sport-1", // Swimming
+      startTime: start,
+      endTime: end,
+      date: todayStr,
+      price: 1, // 1 rupee for testing
+      available: true
+    });
+    
+    // Also add for tomorrow
+    slots.push({
+      id: `slot-test-payment-${tomorrowStr}-${index}`,
+      centerId: "center-1", // Bandra center
+      sportId: "sport-1", // Swimming
+      startTime: start,
+      endTime: end,
+      date: tomorrowStr,
+      price: 1, // 1 rupee for testing
+      available: true
+    });
   });
   
   return slots;
