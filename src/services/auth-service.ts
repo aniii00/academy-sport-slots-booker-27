@@ -50,6 +50,8 @@ export const signupUser = async (
   phone?: string
 ): Promise<boolean> => {
   try {
+    console.log("Starting signup process for:", email);
+    
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
@@ -62,18 +64,27 @@ export const signupUser = async (
     });
     
     if (authError) {
+      console.error('Signup auth error:', authError);
       toast.error(authError.message);
       return false;
     }
 
+    console.log("Auth data from signup:", authData);
+
     if (authData.user) {
+      // Create profile record
+      const firstName = name.split(' ')[0];
+      const lastName = name.split(' ').slice(1).join(' ');
+      
+      console.log(`Creating profile for user ${authData.user.id} with name: ${firstName} ${lastName}`);
+      
       const { error: profileError } = await supabase
         .from('profiles')
         .insert({
           id: authData.user.id,
           email,
-          first_name: name.split(' ')[0],
-          last_name: name.split(' ').slice(1).join(' '),
+          first_name: firstName,
+          last_name: lastName,
           role: 'user',
           created_at: new Date().toISOString()
         });
@@ -83,10 +94,14 @@ export const signupUser = async (
         toast.error('Account created but profile setup failed');
         return false;
       }
+      
+      toast.success('Account created successfully! Please check your email for verification.');
+      return true;
+    } else {
+      console.error('No user returned from signup');
+      toast.error('Signup failed: No user data returned');
+      return false;
     }
-
-    toast.success('Account created successfully! Please check your email for verification.');
-    return true;
   } catch (error) {
     console.error('Signup error:', error);
     toast.error('An error occurred during signup');

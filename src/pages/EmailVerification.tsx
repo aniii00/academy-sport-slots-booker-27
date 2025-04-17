@@ -14,11 +14,16 @@ export default function EmailVerification() {
   const email = location.state?.email || "";
 
   useEffect(() => {
+    console.log("EmailVerification component mounted");
+    console.log("Current session:", session);
+    console.log("Email from location state:", email);
+    
     // If user is already authenticated (email verified), redirect to home
     if (session?.user?.email_confirmed_at) {
+      console.log("Email already confirmed, redirecting to home");
       navigate("/");
     }
-  }, [session, navigate]);
+  }, [session, navigate, email]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sports-lightBlue to-white p-4">

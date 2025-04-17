@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
 import { User, Profile, AuthContextType } from '@/types/auth';
+import { Session } from '@supabase/supabase-js';
 import { fetchProfile, loginUser, signupUser, updateUserProfile } from '@/services/auth-service';
 import { toast } from '@/components/ui/sonner';
 

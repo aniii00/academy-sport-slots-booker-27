@@ -32,13 +32,8 @@ export function Navbar() {
   const isAdmin = profile?.role === 'admin';
   
   const getUserInitials = () => {
-    if (!profile?.name) return "U";
-    return profile.name
-      .split(" ")
-      .map(part => part[0])
-      .join("")
-      .toUpperCase()
-      .substring(0, 2);
+    if (!profile) return "U";
+    return (profile.first_name?.[0] || "") + (profile.last_name?.[0] || "");
   };
 
   return (
@@ -71,7 +66,7 @@ export function Navbar() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>{profile?.name || "User Account"}</DropdownMenuLabel>
+                  <DropdownMenuLabel>{profile ? `${profile.first_name || ''} ${profile.last_name || ''}` : "User Account"}</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem>
                     <Link to="/profile" className="flex w-full items-center">
