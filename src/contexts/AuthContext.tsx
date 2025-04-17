@@ -72,14 +72,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
-        setUser(session?.user ?? null);
         
-        // Fetch profile if user is authenticated
         if (session?.user) {
+          // Convert Supabase user to our User interface
+          const userData: User = {
+            id: session.user.id,
+            email: session.user.email || '',
+            name: session.user.user_metadata?.name || '',
+            phone: session.user.user_metadata?.phone || ''
+          };
+          setUser(userData);
+          
+          // Fetch profile after setting user
           setTimeout(() => {
             fetchProfile(session.user.id);
           }, 0);
         } else {
+          setUser(null);
           setProfile(null);
         }
       }
@@ -88,9 +97,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      setUser(session?.user ?? null);
       
       if (session?.user) {
+        // Convert Supabase user to our User interface
+        const userData: User = {
+          id: session.user.id,
+          email: session.user.email || '',
+          name: session.user.user_metadata?.name || '',
+          phone: session.user.user_metadata?.phone || ''
+        };
+        setUser(userData);
         fetchProfile(session.user.id);
       }
     }).finally(() => {

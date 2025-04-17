@@ -178,6 +178,21 @@ export const generateTimeSlots = (): TimeSlot[] => {
     });
   }
   
+  // Add our special 1 rupee test slot - always available
+  const today = new Date();
+  const todayStr = today.toISOString().split('T')[0];
+  
+  slots.push({
+    id: `slot-test-payment-${todayStr}`,
+    centerId: "center-1", // Bandra center
+    sportId: "sport-1", // Swimming
+    startTime: "15:00",
+    endTime: "16:00",
+    date: todayStr,
+    price: 1, // 1 rupee for testing
+    available: true
+  });
+  
   return slots;
 };
 

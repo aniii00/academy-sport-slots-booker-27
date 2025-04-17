@@ -2,6 +2,8 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,15 +24,32 @@ import {
 } from "@/data/mockData";
 import { toast } from "@/components/ui/sonner";
 
+// Add Razorpay type
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
+
 export default function Booking() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { user, profile } = useAuth();
   const slotId = searchParams.get('slotId');
   
   const [slot, setSlot] = useState<TimeSlot | null>(null);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loadingScript, setLoadingScript] = useState(false);
+  
+  // Use profile data if available
+  useEffect(() => {
+    if (profile) {
+      setName(profile.name || "");
+      setPhone(profile.phone || "");
+    }
+  }, [profile]);
   
   // Find slot based on ID from URL
   useEffect(() => {
@@ -49,9 +68,120 @@ export default function Booking() {
     }
   }, [slotId, navigate]);
   
+  // Load Razorpay script
+  useEffect(() => {
+    if (!window.Razorpay && !loadingScript) {
+      setLoadingScript(true);
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.async = true;
+      script.onload = () => {
+        setLoadingScript(false);
+      };
+      document.body.appendChild(script);
+    }
+  }, [loadingScript]);
+  
   // Get the center and sport for the selected slot
   const center = slot ? centers.find(c => c.id === slot.centerId) : null;
   const sport = slot ? sports.find(s => s.id === slot.sportId) : null;
+  
+  const initiatePayment = async () => {
+    if (!user || !slot || !center || !sport) {
+      toast.error("Missing booking information");
+      return;
+    }
+    
+    try {
+      // Create order on the server
+      const response = await supabase.functions.invoke('razorpay', {
+        body: {
+          action: 'create_order',
+          amount: slot.price,
+          receipt: `booking-${Date.now()}`,
+          name,
+          email: user.email,
+          contact: phone
+        },
+      });
+      
+      if (!response.data.success) {
+        throw new Error(response.data.error || "Failed to create order");
+      }
+      
+      const { order, key_id } = response.data;
+      
+      // Initialize Razorpay
+      const razorpay = new window.Razorpay({
+        key: key_id,
+        amount: order.amount,
+        currency: order.currency,
+        order_id: order.id,
+        name: "Prashant Academy",
+        description: `Booking for ${sport.name} at ${center.name}`,
+        image: "https://example.com/your_logo.png",
+        handler: async function(response: any) {
+          await onPaymentSuccess(order.id, response);
+        },
+        prefill: {
+          name,
+          email: user.email,
+          contact: phone
+        },
+        theme: {
+          color: "#3399cc"
+        }
+      });
+      
+      razorpay.open();
+    } catch (error) {
+      console.error("Payment initiation error:", error);
+      toast.error("Failed to initiate payment. Please try again.");
+      setIsSubmitting(false);
+    }
+  };
+  
+  const onPaymentSuccess = async (orderId: string, response: any) => {
+    try {
+      // Verify payment with server
+      const verifyResponse = await supabase.functions.invoke('razorpay', {
+        body: {
+          action: 'verify_payment',
+          razorpay_order_id: response.razorpay_order_id,
+          razorpay_payment_id: response.razorpay_payment_id,
+          razorpay_signature: response.razorpay_signature
+        },
+      });
+      
+      if (!verifyResponse.data.success || !verifyResponse.data.valid) {
+        throw new Error("Payment verification failed");
+      }
+      
+      // Save booking to database
+      if (slot && center && sport && user) {
+        const { error } = await supabase.from('bookings').insert({
+          user_id: user.id,
+          center_name: center.name,
+          sport_type: sport.name,
+          start_time: slot.startTime,
+          end_time: slot.endTime,
+          booking_date: slot.date,
+          amount: slot.price,
+          status: 'confirmed'
+        });
+        
+        if (error) throw error;
+      }
+      
+      toast.success("Booking confirmed! You'll receive details on your phone.");
+      navigate("/booking-success");
+    } catch (error) {
+      console.error("Payment verification error:", error);
+      toast.error("Payment verification failed. Please contact support.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,13 +197,7 @@ export default function Booking() {
     }
     
     setIsSubmitting(true);
-    
-    // Simulate booking process
-    setTimeout(() => {
-      toast.success("Booking confirmed! You'll receive details on your phone.");
-      navigate("/booking-success");
-      setIsSubmitting(false);
-    }, 1500);
+    initiatePayment();
   };
   
   if (!slot || !center || !sport) {
@@ -132,6 +256,9 @@ export default function Booking() {
                   <div className="flex items-center text-xl font-bold text-sports-orange">
                     <PriceIcon className="h-5 w-5 mr-1" />
                     <span>₹{slot.price}</span>
+                    {slot.price === 1 && (
+                      <span className="ml-2 text-sm bg-green-100 text-green-800 px-2 py-1 rounded">Test Payment</span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -184,9 +311,9 @@ export default function Booking() {
               <Button 
                 type="submit" 
                 className="w-full md:w-auto"
-                disabled={isSubmitting}
+                disabled={isSubmitting || loadingScript}
               >
-                {isSubmitting ? "Processing..." : "Confirm Booking"}
+                {isSubmitting ? "Processing..." : loadingScript ? "Loading Payment..." : `Pay ₹${slot.price}`}
               </Button>
             </CardFooter>
           </form>
