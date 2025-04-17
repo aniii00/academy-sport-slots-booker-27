@@ -2,6 +2,7 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/components/ui/sonner";
+import { useEffect, useRef } from "react";
 
 interface AdminRouteProps {
   children: React.ReactNode;
@@ -10,6 +11,7 @@ interface AdminRouteProps {
 export function AdminRoute({ children }: AdminRouteProps) {
   const { profile, isLoading } = useAuth();
   const location = useLocation();
+  const hasShownToast = useRef(false);
   
   // Debug the profile data to see what's happening
   console.log("AdminRoute - profile:", profile);
@@ -27,11 +29,17 @@ export function AdminRoute({ children }: AdminRouteProps) {
 
   // Once profile is loaded, check if role is admin
   if (profile.role !== 'admin') {
-    // Show a toast message when access is denied
-    toast.error("You don't have admin access");
+    // Only show toast once
+    if (!hasShownToast.current) {
+      toast.error("You don't have admin access");
+      hasShownToast.current = true;
+    }
     // Redirect to home if not an admin
     return <Navigate to="/" state={{ from: location }} replace />;
   }
+
+  // Reset toast flag when successfully entering admin route
+  hasShownToast.current = false;
 
   return <>{children}</>;
 }
