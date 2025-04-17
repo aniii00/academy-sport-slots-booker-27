@@ -14,8 +14,9 @@ export function AdminRoute({ children }: AdminRouteProps) {
   // Debug the profile data to see what's happening
   console.log("AdminRoute - profile:", profile);
   console.log("AdminRoute - role:", profile?.role);
+  console.log("AdminRoute - isAdmin check:", profile?.role === 'admin');
   
-  // Check if the user's role is admin
+  // Check if the user's role is strictly 'admin' (case-sensitive string comparison)
   const isAdmin = profile?.role === 'admin';
 
   if (isLoading) {
@@ -27,11 +28,12 @@ export function AdminRoute({ children }: AdminRouteProps) {
     );
   }
 
+  // If profile exists but role is not strictly 'admin', deny access
   if (!isAdmin) {
     // Show a toast message when access is denied
     toast.error("You don't have admin access");
     // Redirect to home if not an admin
-    return <Navigate to="/" replace />;
+    return <Navigate to="/" state={{ from: location }} replace />;
   }
 
   return <>{children}</>;
