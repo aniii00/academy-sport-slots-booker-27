@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/ui/page-header";
@@ -42,6 +43,7 @@ type ProfileFormValues = z.infer<typeof profileSchema>;
 
 export default function Profile() {
   const { profile, updateProfile, isLoading } = useAuth();
+  const navigate = useNavigate();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [isUpdating, setIsUpdating] = useState(false);
   const [activeTab, setActiveTab] = useState("profile");
